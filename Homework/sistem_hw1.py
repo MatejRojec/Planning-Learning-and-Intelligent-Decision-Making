@@ -17,12 +17,10 @@ p = np.array([ [0, 1, 0, 0, 0, 0, 0] ,
                [0, 0, 1/3, 0, 1/3, 1/3, 0]
                 ])
 
-print(sum(p))
 
 p_squared = np.dot(p, p)[:,1]
 
-print(p)
-print(p_squared)
+#print(p)
 
 indexRecycling_plant = states.index("Recycling plant")
 indexStop_A = states.index("Stop A")
@@ -35,19 +33,18 @@ indexStop_D = states.index("Stop F")
 p1 = p[indexRecycling_plant][indexStop_A] * p[indexStop_A][indexStop_B] 
 print("Recycling plant - stop A - stop B", p1)
 
-eigenValues, eigenVectors = np.linalg.eig(p.T)
-print(eigenValues)
-print(eigenVectors)
+eigvals, eigvecs = np.linalg.eig(p.T)
+print(eigvals)
+print(eigvecs)
+stationary = eigvecs[:, np.isclose(eigvals, 1)]
+stationary = stationary / np.sum(stationary)
 
-p = np.array([ [0, 1, 0, 0, 0, 0, 0] ,
-               [1/4, 0, 1/4, 1/4, 1/4, 0, 0]  ,
-               [0, 1/2, 0, 0, 0, 0, 1/2] ,
-               [0, 1/2, 0, 0, 0, 1/2, 0] ,               
-               [0, 1/2, 0, 0, 0, 0, 1/2] ,
-               [0, 0, 0, 1/2, 0, 0, 1/2] ,
-               [0, 0, 1/3, 0, 1/3, 1/3, 0]
-                ])
+print("The exact stationary distribution of q is:")
+print(stationary)
 
+
+
+# system of equsions
 
 A = np.array([ [-1, 1/4, 1/4, 1/4, 0, 0] ,
                [1/2, -1, 0, 0, 0, 1/2] ,
@@ -56,6 +53,9 @@ A = np.array([ [-1, 1/4, 1/4, 1/4, 0, 0] ,
                [0, 0, 1/2, 0, -1, 1/2] ,
                [0, 1/3, 0, 1/3, 1/3, -1] ])
 
-b = np.array([-48.75, -60, -55, -70, -37.5, 85])
+b = np.array([-30 -1/4 * (40+70+55+30), -60, -55, -70, -37.5, 85])
 x = np.linalg.solve(A, b)
 print(x)
+
+
+
