@@ -37,9 +37,9 @@ eigvals, eigvecs = np.linalg.eig(p.T)
 print(eigvals)
 print(eigvecs)
 stationary = eigvecs[:, np.isclose(eigvals, 1)]
-stationary = stationary / np.sum(stationary)
+stationary = stationary.ravel() / np.sum(stationary)
 
-print("The exact stationary distribution of q is:")
+print("The exact stationary distribution of p is:")
 print(stationary)
 
 
@@ -58,4 +58,43 @@ x = np.linalg.solve(A, b)
 print(x)
 
 
+currentState = "Recycling plant"
+frequencies = {}
 
+
+init_dist = np.ones((1, 7)) / 7
+nd_cumsum = np.cumsum(init_dist)
+
+
+trajectory = []
+
+current_state = np.random.choice(7, p=init_dist.ravel())
+currentState = states[current_state]
+
+for i in range(0, 10000):
+    trajectory.append(states[current_state])
+    current_state = np.random.choice(7 , p = p[current_state])
+
+print("Trajectory length:", len(trajectory))
+print("First 10 stops:", trajectory[0:10])
+
+
+
+import matplotlib.pyplot as plt
+
+# Simulate a long trajectory
+traj = np.array(trajectory)
+
+states, counters = np.unique(traj, return_counts=True)
+print(states)
+print(counters)
+
+predicted = np.round(stationary * 10000, 0).astype(int)
+print(predicted)
+
+plt.bar(range(7), counters, align='center', label='simulation')
+plt.xticks(range(7), states, rotation=90)
+stac = [[stationary[i] * 10000] for i in range(len(stationary))]
+plt.plot(states, stac, 'ro', label='stationary_dist')
+plt.legend(loc='upper right')
+plt.show()
