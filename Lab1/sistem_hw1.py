@@ -18,10 +18,14 @@ p = np.array([ [0, 1, 0, 0, 0, 0, 0] ,
                 ])
 
 
+#p = np.load('garbage-big.npy')
+#print(p.shape[1])
+
+
 p_squared = np.dot(p, p)[:,1]
 
 #print(p)
-
+'''
 indexRecycling_plant = states.index("Recycling plant")
 indexStop_A = states.index("Stop A")
 indexStop_B = states.index("Stop B")
@@ -32,7 +36,7 @@ indexStop_D = states.index("Stop F")
 
 p1 = p[indexRecycling_plant][indexStop_A] * p[indexStop_A][indexStop_B] 
 print("Recycling plant - stop A - stop B", p1)
-
+'''
 eigvals, eigvecs = np.linalg.eig(p.T)
 print(eigvals)
 print(eigvecs)
@@ -45,7 +49,7 @@ print(stationary)
 
 
 # system of equsions
-
+'''
 A = np.array([ [-1, 1/4, 1/4, 1/4, 0, 0] ,
                [1/2, -1, 0, 0, 0, 1/2] ,
                [1/2, 0, -1, 0, 1/2, 0] ,
@@ -56,18 +60,17 @@ A = np.array([ [-1, 1/4, 1/4, 1/4, 0, 0] ,
 b = np.array([-30 -1/4 * (40+70+55+30), -60, -55, -70, -37.5, 85])
 x = np.linalg.solve(A, b)
 print(x)
+'''
 
-
-init_dist = np.ones((1, 7)) / 7
+init_dist = np.ones((1, p.shape[1])) / p.shape[1]
 
 
 def trajectory_output(p , init_dist, N):
     trajectory = []
-    current_state = np.random.choice(7, p=init_dist.ravel())
-
-    for i in range(0, N):
+    current_state = np.random.choice(p.shape[1], p=init_dist.ravel())
+    for _ in range(0, N):
         trajectory.append(states[current_state])
-        current_state = np.random.choice(7 , p = p[current_state])
+        current_state = np.random.choice(p.shape[1] , p = p[current_state])
     return(trajectory)
 
 trajectory = trajectory_output(p, init_dist, 10000)
@@ -84,8 +87,8 @@ states, count = np.unique(traj, return_counts=True)
 
 predicted = np.round(stationary * 10000, 0).astype(int)
 
-plt.bar(range(7), count, align='center', label='simulation')
-plt.xticks(range(7), states, rotation=90)
+plt.bar(range(p.shape[1]), count, align='center', label='simulation')
+plt.xticks(range(p.shape[1]), states, rotation=90)
 stac = [[stationary[i] * 10000] for i in range(len(stationary))]
 plt.plot(states, stac, 'ro', label='stationary distribution')
 plt.legend(loc='upper center')
@@ -96,5 +99,5 @@ def compute_dist(p, nd_array, N):
     matrix = np.linalg.matrix_power(p, N)
     return np.dot(nd_array, matrix)
 
-new_dist = compute_dist(p, init_dist, 1000)
+new_dist = compute_dist(p, init_dist, 10000)
 print(new_dist)
