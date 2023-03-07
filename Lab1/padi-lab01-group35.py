@@ -1,6 +1,6 @@
 import numpy as np
 
-
+# Activity n.1
 def load_chain(trans_matrix):
     trans_matrix = np.load(trans_matrix)
     array_length = trans_matrix.shape[1]
@@ -12,6 +12,8 @@ def load_chain(trans_matrix):
 
 M = load_chain('garbage-big.npy')
 
+# Activity n.2
+
 def prob_trajectory(markov_model, trajectory):
     trans_matrix = markov_model[1]
     prob = 1
@@ -19,6 +21,8 @@ def prob_trajectory(markov_model, trajectory):
         prob *= trans_matrix[int(trajectory[i])][int(trajectory[i + 1])]
     return prob
 
+
+# Activity n.3
 
 def stationary_dist(markov_model):
     trans_matrix = markov_model[1]
@@ -35,6 +39,7 @@ u_star = stationary_dist(M)
 # <font color='blue'>If we look at an example, the states that have more connections, like 19,27 and 35, have higher probabilities as we are expected to be there more time. This is since we can get there from more possible path. On the other hand, states like 0,33 and 35, have low probabilities which is expected as they have only one connection, and the truck is expected to be there only a small part of the time.
 # </font>
 
+# Activity n.4
 
 def compute_dist(markov_model, nd_array, N):
     trans_matrix = markov_model[1]
@@ -55,6 +60,7 @@ def compute_dist(markov_model, nd_array, N):
 # 
 # The chain is also irreducible and aperiodic. This implies that the chain is ergodic.
 
+# Activity n.5 
 
 def simulate(markov_model, init_dist, N):
     trans_matrix = markov_model[1]
@@ -72,6 +78,8 @@ nS = len(M[0])
 u = np.ones((1, nS)) / nS
 
 np.random.seed(42)
+
+# Activity n.6
 
 import matplotlib.pyplot as plt
 
