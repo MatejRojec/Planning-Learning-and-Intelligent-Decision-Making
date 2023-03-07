@@ -7,7 +7,6 @@ def load_chain(trans_matrix):
     states = []
     for x in range(array_length):
         states.append(str(x))
-
     return (states, trans_matrix)
 
 
