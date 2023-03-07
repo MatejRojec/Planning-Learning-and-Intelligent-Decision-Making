@@ -4,12 +4,14 @@ import numpy as np
 def load_chain(trans_matrix):
     trans_matrix = np.load(trans_matrix)
     array_length = trans_matrix.shape[1]
-    states = [str(x) for x in range(array_length)]
+    states = []
+    for x in range(array_length):
+        states.append(str(x))
+
     return (states, trans_matrix)
 
 
 M = load_chain('garbage-big.npy')
-
 
 def prob_trajectory(markov_model, trajectory):
     trans_matrix = markov_model[1]
@@ -83,7 +85,9 @@ states, count = np.unique(traj, return_counts=True)
 plt.figure(figsize=(10, 5))
 plt.bar(range(M[1].shape[1]), count, align='center', label='Simulation')
 plt.xticks(range(M[1].shape[1]), states, rotation=90)
-stac = [[u_star[i] * N] for i in range(len(u_star))]
+stac = []
+for i in range(len(u_star)):
+    stac.append(u_star[i]*N)
 stac = np.array(stac).reshape(states.shape)
 plt.plot(states, stac, 'ro', label='Stationary Distribution')
 plt.legend(loc='upper left')
