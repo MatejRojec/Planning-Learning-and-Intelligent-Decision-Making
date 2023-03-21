@@ -4,6 +4,7 @@ import numpy as np
 
 np.random.seed(42)
 
+
 def load_mdp(file, gamma):
     M = ()
     mdp = np.load(file)
@@ -87,6 +88,7 @@ def value_iteration(mdp):
 
     return J
 
+
 def policy_iteration(mdp):
     X, A, p, c, gamma = mdp
 
@@ -118,16 +120,40 @@ def policy_iteration(mdp):
         Qmin = np.min(Q, axis=1, keepdims=True)
         p_new = np.isclose(Q, Qmin, atol=1e-8, rtol=1e-8).astype(int)
         p_new = p_new / np.sum(p_new, axis=1, keepdims=True)
-        err = np.linalg.norm(p_new - policy)
+        err = np.max(p_new - policy)
 
         policy = p_new
         niter += 1
-
 
     print("Execution time: ", round(time.time() - start, 3), " seconds")
     print("N. iterations: ", niter)
 
     return policy
+
+
+NRUNS = 100
+
+
+def simulate(mdp, policy, x0, length):
+    global NRUNS
+    X, A, p, c, gamma = mdp
+
+    # Initialize the state
+    cost = 0
+
+    for run in range(NRUNS):
+        state = x0
+        for t in range(length):
+            # Select the action according to the policy
+            action = np.random.choice(len(A), p=policy[state, :])
+
+            # Compute the cost
+            cost += c[state, action] * (gamma ** t)
+
+            # Sample the next state
+            state = np.random.choice(len(X), p=p[action][state])
+
+    return cost / NRUNS
 
 
 Jopt = value_iteration(M)
@@ -147,7 +173,6 @@ print('Cost to go at state %s:' % M[0][s], Jopt[s])
 
 print('\nIs the policy from Activity 2 optimal?', np.all(np.isclose(Jopt, Jact2)))
 
-
 popt = policy_iteration(M)
 
 print('\nDimension of the policy matrix:', popt.shape)
@@ -155,17 +180,17 @@ print('\nDimension of the policy matrix:', popt.shape)
 print('\nExamples of actions according to the optimal policy:')
 
 # Select random state, and action using the policy computed
-s = 115 # State (8, 28, empty)
+s = 115  # State (8, 28, empty)
 a = np.random.choice(len(M[1]), p=popt[s, :])
 print('Policy at state %s: %s' % (M[0][s], M[1][a]))
 
 # Select random state, and action using the policy computed
-s = 429 # (0, None, loaded)
+s = 429  # (0, None, loaded)
 a = np.random.choice(len(M[1]), p=popt[s, :])
 print('Policy at state %s: %s' % (M[0][s], M[1][a]))
 
 # Select random state, and action using the policy computed
-s = 239 # State (18, 18, empty)
+s = 239  # State (18, 18, empty)
 a = np.random.choice(len(M[1]), p=popt[s, :])
 print('Policy at state %s: %s' % (M[0][s], M[1][a]))
 
@@ -175,3 +200,21 @@ print('\nOptimality of the computed policy:')
 
 Jpi = evaluate_pol(M, popt)
 print('- Is the new policy optimal?', np.all(np.isclose(Jopt, Jpi)))
+
+# Select arbitrary state, and evaluate for the optimal policy
+s = 115  # State (8, 28, empty)
+print('Cost-to-go for state %s:' % M[0][s])
+print('\tTheoretical:', np.round(Jopt[s], 4))
+print('\tEmpirical:', np.round(simulate(M, popt, s, 1000), 4))
+
+# Select arbitrary state, and evaluate for the optimal policy
+s = 429  # (0, None, loaded)
+print('Cost-to-go for state %s:' % M[0][s])
+print('\tTheoretical:', np.round(Jopt[s], 4))
+print('\tEmpirical:', np.round(simulate(M, popt, s, 1000), 4))
+
+# Select arbitrary state, and evaluate for the optimal policy
+s = 239  # State (18, 18, empty)
+print('Cost-to-go for state %s:' % M[0][s])
+print('\tTheoretical:', np.round(Jopt[s], 4))
+print('\tEmpirical:', np.round(simulate(M, popt, s, 1000), 4))
