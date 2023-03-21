@@ -64,7 +64,6 @@ def value_iteration(mdp):
     c = mdp[3]
     gamma = mdp[4]
     
-
     J = np.zeros((len(X), 1))
     err = 1
 
