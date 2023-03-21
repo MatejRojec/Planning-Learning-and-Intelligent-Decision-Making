@@ -5,15 +5,16 @@ import numpy as np
 
 def load_mdp(file, gamma):
     M = ()
-    mdp_info = np.load(file)
-    M += (tuple(mdp_info['X']), )
-    M += (tuple(mdp_info['A']), )
-    M += (tuple(mdp_info['P']), )
-    M += (mdp_info['c'], )
+    mdp = np.load(file)
+    M += (tuple(mdp['X']), )
+    M += (tuple(mdp['A']), )
+    M += (tuple(mdp['P']), )
+    M += (mdp['c'], )
     M += (gamma, )
     return M
 
 M = load_mdp('garbage-big.npz', 0.99)
+
 # Activity nr.2
 
 def noisy_policy(mdp, a, eps):
@@ -28,23 +29,62 @@ def noisy_policy(mdp, a, eps):
         policy.append(np.array(array))
     return np.array(policy)
 
+
 pol_noiseless = noisy_policy(M, 2, 0.)
 
-# Arbitrary state
-s = 115 # State (8, 28, empty)
+def evaluate_pol(mdp, policy):
+    identity = np.identity(len(mdp[0]))
+    Ppi = [[0 for i in range(len(mdp[0]))] for j in range(len(mdp[0]))]
+    for state1 in range(len(mdp[0])):
+        for state2 in range(len(mdp[0])):
+            for action in range(len(mdp[1])):
+                Ppi[state1][state2] += mdp[2][action][state1][state2]*policy[state1][action]
+    Cpi = []
+    for state in range(len(mdp[0])):
+        num = 0
+        for action in range(len(mdp[1])):
+            num += policy[state][action] * mdp[3][state][action]
+        Cpi.append(num)
+    Jpi = np.matmul(np.linalg.inv(identity - mdp[4] * np.array(Ppi)), np.array(Cpi))
+    return Jpi
 
-# Policy at selected state
-print('Arbitrary state (from previous example):', M[0][s])
-print('Noiseless policy at selected state (eps=0):', pol_noiseless[s, :])
-
-# Noisy policy for action "Left" (action index: 2)
 pol_noisy = noisy_policy(M, 2, 0.1)
 
-# Policy at selected state
-print('Noisy policy at selected state (eps=0.1):', np.round(pol_noisy[s, :], 2))
 
-# Random policy for action "Left" (action index: 2)
-pol_random = noisy_policy(M, 2, 0.75)
+Jact2 = evaluate_pol(M, pol_noisy)
 
-# Policy at selected state
-print('Random policy at selected state (eps=0.75):', np.round(pol_random[s, :], 2))
+print('Dimensions of cost-to-go:', Jact2.shape)
+
+print('\nExample values of the computed cost-to-go:')
+
+s = 115 # State (8, 28, empty)
+print('\nCost-to-go at state %s:' % M[0][s], np.round(Jact2[s], 3))
+
+s = 429 # (0, None, loaded)
+print('Cost-to-go at state %s:' % M[0][s], np.round(Jact2[s], 3))
+
+s = 239 # State (18, 18, empty)
+print('Cost-to-go at state %s:' % M[0][s], np.round(Jact2[s], 3))
+
+# Example with random policy
+
+import numpy.random as rand
+
+rand.seed(42)
+
+
+rand_pol = rand.randint(2, size=(len(M[0]), len(M[1]))) + 0.01 # We add 0.01 to avoid all-zero rows
+rand_pol = rand_pol / rand_pol.sum(axis = 1, keepdims = True)
+
+Jrand = evaluate_pol(M, rand_pol)
+
+print('\nExample values of the computed cost-to-go:')
+
+s = 115 # State (8, 28, empty)
+print('\nCost-to-go at state %s:' % M[0][s], np.round(Jrand[s], 3))
+
+s = 429 # (0, None, loaded)
+print('Cost-to-go at state %s:' % M[0][s], np.round(Jrand[s], 3))
+
+s = 239 # State (18, 18, empty)
+print('Cost-to-go at state %s:' % M[0][s], np.round(Jrand[s], 3))
