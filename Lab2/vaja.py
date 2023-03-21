@@ -55,7 +55,54 @@ Jact2 = evaluate_pol(M, pol_noisy)
 
 # Activety nr. 4
 
+import time
 
+def value_iteration(mdp):
+    X = mdp[0]
+    A = mdp[1]
+    p = mdp[2]
+    c = mdp[3]
+    gamma = mdp[4]
+    
+
+    J = np.zeros((len(X), 1))
+    err = 1
+
+    niter = 0
+    start = time.time()
+
+    Q = np.zeros((len(X), len(A)))
+
+    while err > 1e-8:
+        for action in range(len(mdp[1])):
+            Q[:,action, None] = c[:,action, None] + gamma * p[action].dot(J)
+        Jnew = np.min(Q, axis=1, keepdims= True)
+        err = np.linalg.norm(Jnew-J)
+        niter += 1
+        J = Jnew             
+
+    print("Executoin time: ", round(time.time() - start, 3), " seconds")
+    print("N. iterations: ", niter)
+
+    return J
+
+
+Jopt = value_iteration(M)
+
+print('\nDimensions of cost-to-go:', Jopt.shape)
+
+print('\nExample values of the optimal cost-to-go:')
+
+s = 115 # State (8, 28, empty)
+print('\nCost to go at state %s:' % M[0][s], Jopt[s])
+
+s = 429 # (0, None, loaded)
+print('Cost to go at state %s:' % M[0][s], Jopt[s])
+
+s = 239 # State (18, 18, empty)
+print('Cost to go at state %s:' % M[0][s], Jopt[s])
+
+print('\nIs the policy from Activity 2 optimal?', np.all(np.isclose(Jopt, Jact2)))
 
 
 
