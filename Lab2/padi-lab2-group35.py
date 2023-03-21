@@ -1,25 +1,22 @@
-# Activity nr.1
+
+# Activity 1.
 
 import numpy as np
-
-np.random.seed(42)
-
 
 def load_mdp(file, gamma):
     M = ()
     mdp = np.load(file)
-    M += (tuple(mdp['X']),)
-    M += (tuple(mdp['A']),)
-    M += (tuple(mdp['P']),)
-    M += (mdp['c'],)
-    M += (gamma,)
+    M += (tuple(mdp['X']), )
+    M += (tuple(mdp['A']), )
+    M += (tuple(mdp['P']), )
+    M += (mdp['c'], )
+    M += (gamma, )
     return M
 
+import numpy.random as rand
 
-M = load_mdp('garbage-big.npz', 0.99)
 
-
-# Activity nr.2
+# Activity 2.
 
 def noisy_policy(mdp, a, eps):
     policy = []
@@ -27,17 +24,14 @@ def noisy_policy(mdp, a, eps):
         array = []
         for action in range(len(mdp[1])):
             if action == a:
-                array.append(1 - eps)
+                array.append(1-eps)
             else:
-                array.append((eps / (len(mdp[1]) - 1)))
+                array.append((eps/(len(mdp[1])-1)))
         policy.append(np.array(array))
     return np.array(policy)
 
 
-pol_noiseless = noisy_policy(M, 2, 0.)
-
-
-# Activity nr. 3
+# Activity 3.
 
 def evaluate_pol(mdp, policy):
     identity = np.identity(len(mdp[0]))
@@ -56,15 +50,12 @@ def evaluate_pol(mdp, policy):
     Jpi = np.matmul(np.linalg.inv(identity - mdp[4] * Ppi), Cpi)
     return Jpi
 
+rand.seed(42)
 
-pol_noisy = noisy_policy(M, 2, 0.1)
-Jact2 = evaluate_pol(M, pol_noisy)
+# Activity 4
 
-# Activety nr. 4
-
+# Insert your code here.
 import time
-
-
 def value_iteration(mdp):
     X, A, p, c, gamma = mdp
 
@@ -89,7 +80,9 @@ def value_iteration(mdp):
 
     return J
 
+# Activity 5
 
+# Insert your code here.
 def policy_iteration(mdp):
     X, A, p, c, gamma = mdp
 
@@ -123,10 +116,11 @@ def policy_iteration(mdp):
 
     return policy
 
+# Activity 6
 
-NRUNS = 100
+NRUNS = 100 # Do not delete this
 
-
+# Insert your code here.
 def simulate(mdp, policy, x0, length):
     global NRUNS
     X, A, p, c, gamma = mdp
@@ -147,71 +141,3 @@ def simulate(mdp, policy, x0, length):
             state = np.random.choice(len(X), p=p[action][state])
 
     return cost / NRUNS
-
-
-Jopt = value_iteration(M)
-
-print('\nDimensions of cost-to-go:', Jopt.shape)
-
-print('\nExample values of the optimal cost-to-go:')
-
-s = 115  # State (8, 28, empty)
-print('\nCost to go at state %s:' % M[0][s], Jopt[s])
-
-s = 429  # (0, None, loaded)
-print('Cost to go at state %s:' % M[0][s], Jopt[s])
-
-s = 239  # State (18, 18, empty)
-print('Cost to go at state %s:' % M[0][s], Jopt[s])
-
-print('\nIs the policy from Activity 2 optimal?', np.all(np.isclose(Jopt, Jact2)))
-
-popt = policy_iteration(M)
-
-print('\nDimension of the policy matrix:', popt.shape)
-
-print('\nExamples of actions according to the optimal policy:')
-
-# Select random state, and action using the policy computed
-s = 115  # State (8, 28, empty)
-a = np.random.choice(len(M[1]), p=popt[s, :])
-print('Policy at state %s: %s' % (M[0][s], M[1][a]))
-
-# Select random state, and action using the policy computed
-s = 429  # (0, None, loaded)
-a = np.random.choice(len(M[1]), p=popt[s, :])
-print('Policy at state %s: %s' % (M[0][s], M[1][a]))
-
-# Select random state, and action using the policy computed
-s = 239  # State (18, 18, empty)
-a = np.random.choice(len(M[1]), p=popt[s, :])
-print('Policy at state %s: %s' % (M[0][s], M[1][a]))
-
-# Verify optimality of the computed policy
-
-print('\nOptimality of the computed policy:')
-
-Jpi = evaluate_pol(M, popt)
-print('- Is the new policy optimal?', np.all(np.isclose(Jopt, Jpi)))
-
-if not np.all(np.isclose(Jopt, Jpi)):
-    print(f"The max difference between the two cost-to-go matrices is {np.max(np.abs(Jopt - Jpi))}")
-    print(f"The average difference between the two cost-to-go matrices is {np.mean(np.abs(Jopt - Jpi))}")
-
-# Select arbitrary state, and evaluate for the optimal policy
-s = 115  # State (8, 28, empty)
-print('Cost-to-go for state %s:' % M[0][s])
-print('\tTheoretical:', np.round(Jopt[s], 4))
-print('\tEmpirical:', np.round(simulate(M, popt, s, 1000), 4))
-
-# Select arbitrary state, and evaluate for the optimal policy
-s = 429  # (0, None, loaded)
-print('Cost-to-go for state %s:' % M[0][s])
-print('\tTheoretical:', np.round(Jopt[s], 4))
-print('\tEmpirical:', np.round(simulate(M, popt, s, 1000), 4))
-
-# Select arbitrary state, and evaluate for the optimal policy
-s = 239  # State (18, 18, empty)
-print('Cost-to-go for state %s:' % M[0][s])
-print('\tTheoretical:', np.round(Jopt[s], 4))
-print('\tEmpirical:', np.round(simulate(M, popt, s, 1000), 4))
