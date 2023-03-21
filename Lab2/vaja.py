@@ -96,31 +96,24 @@ def policy_iteration(mdp):
     policy = np.ones((len(X), len(A))) / len(A)
 
     V = np.zeros((len(X), 1))
-    err = 1
+    quit = False
     niter = 0
 
     start = time.time()
+    Q = np.zeros((len(X), len(A)))
 
-    while err > 1e-8:
-        Q = np.zeros((len(X), len(A)))
+    while not quit:
 
-        # Policy evaluation
-        cpi = np.sum(policy * c, axis=1, keepdims=True)
-        Ppi = policy[:, 0, None] * p[0]
-
-        for action in range(1, len(A)):
-            Ppi += policy[:, action, None] * p[action]
-
-        J = np.linalg.inv(np.eye(len(X)) - gamma * Ppi).dot(cpi)
-        V = J
+        J = evaluate_pol(mdp, policy)
+        print(J.shape)
 
         for action in range(len(A)):
-            Q[:, action, None] = c[:, action, None] + gamma * p[action].dot(V)
+            Q[:, action, None] = c[:, action, None] + gamma * p[action].dot(J)
 
         Qmin = np.min(Q, axis=1, keepdims=True)
-        p_new = np.isclose(Q, Qmin, atol=1e-8, rtol=1e-8).astype(int)
-        p_new = p_new / np.sum(p_new, axis=1, keepdims=True)
-        err = np.max(p_new - policy)
+        p_new = np.isclose(Q, Qmin, atol=1e-10, rtol=1e-10).astype(int)
+        p_new = p_new / p_new.sum(axis=1, keepdims=True)
+        quit = (policy == p_new).all()
 
         policy = p_new
         niter += 1
@@ -200,6 +193,10 @@ print('\nOptimality of the computed policy:')
 
 Jpi = evaluate_pol(M, popt)
 print('- Is the new policy optimal?', np.all(np.isclose(Jopt, Jpi)))
+
+if not np.all(np.isclose(Jopt, Jpi)):
+    print(f"The max difference between the two cost-to-go matrices is {np.max(np.abs(Jopt - Jpi))}")
+    print(f"The average difference between the two cost-to-go matrices is {np.mean(np.abs(Jopt - Jpi))}")
 
 # Select arbitrary state, and evaluate for the optimal policy
 s = 115  # State (8, 28, empty)
