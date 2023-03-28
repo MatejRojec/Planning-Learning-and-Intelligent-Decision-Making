@@ -11,3 +11,4 @@ def load_pomdp(file, gamma):
     c = pomdp['c']
 
     return (S, A, Z, P, O, c, gamma)
+
