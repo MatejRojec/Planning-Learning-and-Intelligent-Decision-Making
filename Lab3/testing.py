@@ -3,7 +3,7 @@ import numpy as np
 
 def load_pomdp(file, gamma):
     pomdp = np.load(file)
-    S = tuple(pomdp['S'])
+    X = tuple(pomdp['X'])
     A = tuple(pomdp['A'])
     Z = tuple(pomdp['Z'])
     P = tuple(pomdp['P'])
